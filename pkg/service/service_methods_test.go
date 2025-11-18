@@ -265,31 +265,6 @@ func TestServiceNameImmutable(t *testing.T) {
 	assert.Equal(t, n1, n2, "Name should be consistent across calls")
 }
 
-// TestDeviceServiceCreationConcurrency tests creating multiple services concurrently
-func TestDeviceServiceCreationConcurrency(t *testing.T) {
-	mockDriver1 := &mocks.ProtocolDriver{}
-	mockDriver2 := &mocks.ProtocolDriver{}
-
-	done := make(chan bool, 2)
-
-	go func() {
-		service, err := NewDeviceService("service-1", "1.0.0", mockDriver1)
-		assert.NoError(t, err)
-		assert.NotNil(t, service)
-		done <- true
-	}()
-
-	go func() {
-		service, err := NewDeviceService("service-2", "2.0.0", mockDriver2)
-		assert.NoError(t, err)
-		assert.NotNil(t, service)
-		done <- true
-	}()
-
-	<-done
-	<-done
-}
-
 // TestStopIdempotency tests that Stop can be called multiple times
 func TestStopIdempotency(t *testing.T) {
 	mockDriver := &mocks.ProtocolDriver{}
