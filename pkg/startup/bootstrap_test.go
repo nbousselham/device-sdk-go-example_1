@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/edgexfoundry/device-sdk-go/v4/pkg/interfaces/mocks"
-	"github.com/edgexfoundry/go-mod-core-contracts/v4/models"
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v4/pkg/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v4/models"
 )
 
 // mockProtocolDriver is a simple mock implementation for testing
@@ -111,13 +111,13 @@ func TestBootstrapValidation(t *testing.T) {
 			} else {
 				assert.NotEmpty(t, tt.serviceKey)
 			}
-			
+
 			if tt.serviceVersion == "" {
 				assert.Empty(t, tt.serviceVersion)
 			} else {
 				assert.NotEmpty(t, tt.serviceVersion)
 			}
-			
+
 			assert.NotNil(t, tt.driver)
 		})
 	}
@@ -127,9 +127,9 @@ func TestBootstrapValidation(t *testing.T) {
 func TestBootstrapWithMockDriver(t *testing.T) {
 	// Note: We cannot directly test Bootstrap as it calls os.Exit
 	// This test verifies the driver interface is correctly implemented
-	
+
 	mockDriver := &mockProtocolDriver{}
-	
+
 	// Verify driver implements all required methods
 	assert.NotNil(t, mockDriver.Initialize)
 	assert.NotNil(t, mockDriver.Start)
@@ -146,7 +146,7 @@ func TestBootstrapWithMockDriver(t *testing.T) {
 // TestBootstrapDriverInitialization tests that the driver would be initialized
 func TestBootstrapDriverInitialization(t *testing.T) {
 	mockDriver := &mockProtocolDriver{}
-	
+
 	// Simulate what Bootstrap would do
 	err := mockDriver.Initialize(nil)
 	assert.NoError(t, err)
@@ -159,7 +159,7 @@ func TestBootstrapDriverInitializationError(t *testing.T) {
 	mockDriver := &mockProtocolDriver{
 		initError: expectedErr,
 	}
-	
+
 	// Simulate what Bootstrap would do
 	err := mockDriver.Initialize(nil)
 	assert.Error(t, err)
@@ -173,7 +173,7 @@ func TestBootstrapDriverStartError(t *testing.T) {
 	mockDriver := &mockProtocolDriver{
 		startError: expectedErr,
 	}
-	
+
 	err := mockDriver.Start()
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)
@@ -185,7 +185,7 @@ func TestBootstrapDriverStopError(t *testing.T) {
 	mockDriver := &mockProtocolDriver{
 		stopError: expectedErr,
 	}
-	
+
 	err := mockDriver.Stop(false)
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)
@@ -194,33 +194,33 @@ func TestBootstrapDriverStopError(t *testing.T) {
 // TestBootstrapWithTestifyMock tests Bootstrap with testify mock
 func TestBootstrapWithTestifyMock(t *testing.T) {
 	mockDriver := &mocks.ProtocolDriver{}
-	
+
 	// Setup expectations for a successful bootstrap sequence
 	mockDriver.On("Initialize", mock.Anything).Return(nil).Once()
 	mockDriver.On("Start").Return(nil).Once()
 	mockDriver.On("Stop", mock.Anything).Return(nil).Maybe()
-	
+
 	// Verify the mock is properly configured
 	err := mockDriver.Initialize(nil)
 	assert.NoError(t, err)
-	
+
 	err = mockDriver.Start()
 	assert.NoError(t, err)
-	
+
 	mockDriver.AssertExpectations(t)
 }
 
 // TestBootstrapWithFailingDriver tests Bootstrap with a driver that fails initialization
 func TestBootstrapWithFailingDriver(t *testing.T) {
 	mockDriver := &mocks.ProtocolDriver{}
-	
+
 	expectedErr := errors.New("driver initialization failed")
 	mockDriver.On("Initialize", mock.Anything).Return(expectedErr).Once()
-	
+
 	err := mockDriver.Initialize(nil)
 	assert.Error(t, err)
 	assert.Equal(t, expectedErr, err)
-	
+
 	mockDriver.AssertExpectations(t)
 }
 
@@ -233,7 +233,7 @@ func TestBootstrapServiceKeyFormats(t *testing.T) {
 		"DeviceService123",
 		"device_service",
 	}
-	
+
 	for _, key := range validServiceKeys {
 		t.Run("service key: "+key, func(t *testing.T) {
 			assert.NotEmpty(t, key)
@@ -251,7 +251,7 @@ func TestBootstrapVersionFormats(t *testing.T) {
 		"v1.2.3",
 		"1.0.0-rc.1",
 	}
-	
+
 	for _, version := range validVersions {
 		t.Run("version: "+version, func(t *testing.T) {
 			assert.NotEmpty(t, version)
@@ -265,13 +265,13 @@ func TestBootstrapEnvironmentVariables(t *testing.T) {
 	// Test that environment variables can be set
 	testEnvVar := "TEST_BOOTSTRAP_VAR"
 	testValue := "test-value"
-	
+
 	err := os.Setenv(testEnvVar, testValue)
 	require.NoError(t, err)
-	
+
 	value := os.Getenv(testEnvVar)
 	assert.Equal(t, testValue, value)
-	
+
 	// Cleanup
 	os.Unsetenv(testEnvVar)
 }
@@ -286,34 +286,34 @@ func TestBootstrapCommandLineFlags(t *testing.T) {
 // TestBootstrapDriverLifecycle tests the complete driver lifecycle
 func TestBootstrapDriverLifecycle(t *testing.T) {
 	mockDriver := &mocks.ProtocolDriver{}
-	
+
 	// Setup expectations for complete lifecycle
 	mockDriver.On("Initialize", mock.Anything).Return(nil).Once()
 	mockDriver.On("Start").Return(nil).Once()
 	mockDriver.On("Stop", false).Return(nil).Once()
-	
+
 	// Simulate lifecycle
 	err := mockDriver.Initialize(nil)
 	assert.NoError(t, err)
-	
+
 	err = mockDriver.Start()
 	assert.NoError(t, err)
-	
+
 	err = mockDriver.Stop(false)
 	assert.NoError(t, err)
-	
+
 	mockDriver.AssertExpectations(t)
 }
 
 // TestBootstrapDriverLifecycleWithForceStop tests forced stop
 func TestBootstrapDriverLifecycleWithForceStop(t *testing.T) {
 	mockDriver := &mocks.ProtocolDriver{}
-	
+
 	mockDriver.On("Stop", true).Return(nil).Once()
-	
+
 	err := mockDriver.Stop(true)
 	assert.NoError(t, err)
-	
+
 	mockDriver.AssertExpectations(t)
 }
 
@@ -321,12 +321,12 @@ func TestBootstrapDriverLifecycleWithForceStop(t *testing.T) {
 func TestBootstrapMultipleDriverInstances(t *testing.T) {
 	driver1 := &mockProtocolDriver{}
 	driver2 := &mockProtocolDriver{}
-	
+
 	// Initialize both drivers
 	err := driver1.Initialize(nil)
 	assert.NoError(t, err)
 	assert.True(t, driver1.initCalled)
-	
+
 	err = driver2.Initialize(nil)
 	assert.NoError(t, err)
 	assert.True(t, driver2.initCalled)
@@ -335,53 +335,53 @@ func TestBootstrapMultipleDriverInstances(t *testing.T) {
 // TestBootstrapDriverMethods tests all driver methods are callable
 func TestBootstrapDriverMethods(t *testing.T) {
 	mockDriver := &mockProtocolDriver{}
-	
+
 	// Test all methods exist and are callable
 	t.Run("Initialize", func(t *testing.T) {
 		err := mockDriver.Initialize(nil)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("Start", func(t *testing.T) {
 		err := mockDriver.Start()
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("Stop", func(t *testing.T) {
 		err := mockDriver.Stop(false)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("HandleReadCommands", func(t *testing.T) {
 		_, err := mockDriver.HandleReadCommands("device", nil, nil)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("HandleWriteCommands", func(t *testing.T) {
 		err := mockDriver.HandleWriteCommands("device", nil, nil, nil)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("AddDevice", func(t *testing.T) {
 		err := mockDriver.AddDevice("device", nil, models.Unlocked)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("UpdateDevice", func(t *testing.T) {
 		err := mockDriver.UpdateDevice("device", nil, models.Unlocked)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("RemoveDevice", func(t *testing.T) {
 		err := mockDriver.RemoveDevice("device", nil)
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("Discover", func(t *testing.T) {
 		err := mockDriver.Discover()
 		assert.NoError(t, err)
 	})
-	
+
 	t.Run("ValidateDevice", func(t *testing.T) {
 		err := mockDriver.ValidateDevice(models.Device{})
 		assert.NoError(t, err)
@@ -397,7 +397,7 @@ func TestBootstrapErrorScenarios(t *testing.T) {
 		err := driver.Initialize(nil)
 		assert.Error(t, err)
 	})
-	
+
 	t.Run("Start error", func(t *testing.T) {
 		driver := &mockProtocolDriver{
 			startError: errors.New("start failed"),
@@ -405,7 +405,7 @@ func TestBootstrapErrorScenarios(t *testing.T) {
 		err := driver.Start()
 		assert.Error(t, err)
 	})
-	
+
 	t.Run("Stop error", func(t *testing.T) {
 		driver := &mockProtocolDriver{
 			stopError: errors.New("stop failed"),
@@ -426,7 +426,7 @@ func TestBootstrapNilDriver(t *testing.T) {
 // BenchmarkBootstrapDriverInitialize benchmarks driver initialization
 func BenchmarkBootstrapDriverInitialize(b *testing.B) {
 	driver := &mockProtocolDriver{}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = driver.Initialize(nil)
@@ -436,7 +436,7 @@ func BenchmarkBootstrapDriverInitialize(b *testing.B) {
 // BenchmarkBootstrapDriverStart benchmarks driver start
 func BenchmarkBootstrapDriverStart(b *testing.B) {
 	driver := &mockProtocolDriver{}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = driver.Start()
@@ -446,7 +446,7 @@ func BenchmarkBootstrapDriverStart(b *testing.B) {
 // BenchmarkBootstrapDriverStop benchmarks driver stop
 func BenchmarkBootstrapDriverStop(b *testing.B) {
 	driver := &mockProtocolDriver{}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = driver.Stop(false)

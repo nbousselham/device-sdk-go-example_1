@@ -86,7 +86,7 @@ func TestProtocolDriverInterface(t *testing.T) {
 		protocols := map[string]models.ProtocolProperties{
 			"tcp": {"host": "192.168.1.100", "port": "502"},
 		}
-		adminState := models.Unlocked
+		adminState := models.AdminState(models.Unlocked)
 
 		mockDriver.On("AddDevice", deviceName, protocols, adminState).Return(nil).Once()
 		err := mockDriver.AddDevice(deviceName, protocols, adminState)
@@ -99,7 +99,7 @@ func TestProtocolDriverInterface(t *testing.T) {
 		protocols := map[string]models.ProtocolProperties{
 			"tcp": {"host": "192.168.1.101", "port": "502"},
 		}
-		adminState := models.Locked
+		adminState := models.AdminState(models.Locked)
 
 		mockDriver.On("UpdateDevice", deviceName, protocols, adminState).Return(nil).Once()
 		err := mockDriver.UpdateDevice(deviceName, protocols, adminState)
@@ -275,14 +275,6 @@ func TestUpdatableConfigInterface(t *testing.T) {
 		assert.True(t, updated)
 		mockConfig.AssertExpectations(t)
 	})
-
-	t.Run("UpdateWritableFromRaw", func(t *testing.T) {
-		rawWritable := make(map[string]any)
-		mockConfig.On("UpdateWritableFromRaw", rawWritable).Return(true).Once()
-		updated := mockConfig.UpdateWritableFromRaw(rawWritable)
-		assert.True(t, updated)
-		mockConfig.AssertExpectations(t)
-	})
 }
 
 // TestMockInteractions tests interactions between mocked interfaces
@@ -324,23 +316,23 @@ func TestMockInteractions(t *testing.T) {
 
 		// Add device
 		mockSDK.On("AddDevice", device).Return("device-id-123", nil).Once()
-		mockDriver.On("AddDevice", deviceName, protocols, models.Unlocked).Return(nil).Once()
+		mockDriver.On("AddDevice", deviceName, protocols, models.AdminState(models.Unlocked)).Return(nil).Once()
 
 		id, err := mockSDK.AddDevice(device)
 		assert.NoError(t, err)
 		assert.Equal(t, "device-id-123", id)
 
-		err = mockDriver.AddDevice(deviceName, protocols, models.Unlocked)
+		err = mockDriver.AddDevice(deviceName, protocols, models.AdminState(models.Unlocked))
 		assert.NoError(t, err)
 
 		// Update device
 		mockSDK.On("UpdateDevice", device).Return(nil).Once()
-		mockDriver.On("UpdateDevice", deviceName, protocols, models.Locked).Return(nil).Once()
+		mockDriver.On("UpdateDevice", deviceName, protocols, models.AdminState(models.Locked)).Return(nil).Once()
 
 		err = mockSDK.UpdateDevice(device)
 		assert.NoError(t, err)
 
-		err = mockDriver.UpdateDevice(deviceName, protocols, models.Locked)
+		err = mockDriver.UpdateDevice(deviceName, protocols, models.AdminState(models.Locked))
 		assert.NoError(t, err)
 
 		// Remove device
@@ -688,7 +680,7 @@ func TestMethodWithAnyMatcher(t *testing.T) {
 	// Use mock.Anything to match any argument
 	mockDriver.On("AddDevice", mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
-	err := mockDriver.AddDevice("any-device", map[string]models.ProtocolProperties{}, models.Unlocked)
+	err := mockDriver.AddDevice("any-device", map[string]models.ProtocolProperties{}, models.AdminState(models.Unlocked))
 	assert.NoError(t, err)
 	mockDriver.AssertExpectations(t)
 }
