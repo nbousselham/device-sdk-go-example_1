@@ -51,6 +51,17 @@ docker:
 unittest:
 	go test $(GOTESTFLAGS) -coverprofile=coverage.out ./...
 
+coverage-report: unittest
+	@echo "=== Coverage Report ==="
+	@go tool cover -func=coverage.out | grep -E "(pkg/interfaces|pkg/service|pkg/startup|pkg/models)" || true
+	@echo ""
+	@echo "=== Total Coverage ==="
+	@go tool cover -func=coverage.out | grep "total:"
+	@echo ""
+	@echo "=== Generating HTML Report ==="
+	@go tool cover -html=coverage.out -o coverage.html
+	@echo "HTML coverage report generated: coverage.html"
+
 lint:
 	@which golangci-lint >/dev/null || echo "WARNING: go linter not installed. To install, run make install-lint"
 	@if [ "z${ARCH}" = "zx86_64" ] && which golangci-lint >/dev/null ; then golangci-lint run --config .golangci.yml ; else echo "WARNING: Linting skipped (not on x86_64 or linter not installed)"; fi

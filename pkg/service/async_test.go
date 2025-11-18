@@ -12,6 +12,7 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/v4/models"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/edgexfoundry/device-sdk-go/v4/internal/config"
 	sdkModels "github.com/edgexfoundry/device-sdk-go/v4/pkg/models"
 )
 
@@ -23,6 +24,7 @@ func newDeviceService() *deviceService {
 	return &deviceService{
 		serviceKey: "test-service",
 		lc:         logger.NewMockClient(),
+		config:     &config.ConfigurationStruct{},
 	}
 }
 
